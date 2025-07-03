@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Manage Blog Posts - Admin</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body { padding-top: 80px; }
+    textarea { resize: vertical; }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+    <div class="container">
+      <a class="navbar-brand" href="admin-dashboard.html">← Back to Dashboard</a>
+    </div>
+  </nav>
+
+  <div class="container mt-4">
+    <h2 class="mb-4 text-center">📝 Manage Blog Posts</h2>
+
+    <!-- Add Blog Form -->
+    <form id="blogForm" class="mb-4">
+      <div class="mb-3">
+        <label for="title" class="form-label">Blog Title</label>
+        <input type="text" id="title" name="title" class="form-control" required />
+      </div>
+      <div class="mb-3">
+        <label for="content" class="form-label">Blog Content</label>
+        <textarea id="content" name="content" rows="5" class="form-control" required></textarea>
+      </div>
+      <button type="submit" class="btn btn-success">Add Post</button>
+    </form>
+
+    <!-- Blog List -->
+    <table class="table table-striped">
+      <thead class="table-dark">
+        <tr>
+          <th>#</th>
+          <th>Title</th>
+          <th>Content</th>
+          <th>Created</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="blogTableBody"></tbody>
+    </table>
+  </div>
+
+  <script>
+    async function fetchBlogs() {
+      const res = await fetch('/api/blog');
+      const posts = await res.json();
+      const tbody = document.getElementById('blogTableBody');
+      tbody.innerHTML = '';
+
+      posts.forEach((post, i) => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${i + 1}</td>
+            <td>${post.title}</td>
+            <td>${post.content.substring(0, 50)}...</td>
+            <td>${new Date(post.created_at).toLocaleString()}</td>
+            <td>
+              <button onclick="deletePost(${post.id})" class="btn btn-sm btn-danger">Delete</button>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    document.getElementById('blogForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const formData = new FormData(this);
+      const data = Object.fromEntries(formData.entries());
+
+      const res = await fetch('/api/blog', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+
+      const result = await res.json();
+      alert(result.success || result.error);
+      this.reset();
+      fetchBlogs();
+    });
+
+    async function deletePost(id) {
+      if (!confirm('Delete this post?')) return;
+
+      const res = await fetch(`/api/blog/${id}`, { method: 'DELETE' });
+      const result = await res.json();
+      alert(result.success || result.error);
+      fetchBlogs();
+    }
+
+    fetchBlogs();
+  </script>
+
+</body>
+</html>

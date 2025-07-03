@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Contact Messages - Admin</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body { padding-top: 80px; }
+    table { font-size: 0.95rem; }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+    <div class="container">
+      <a class="navbar-brand" href="admin-dashboard.html">← Back to Dashboard</a>
+    </div>
+  </nav>
+
+  <div class="container mt-5">
+    <h2 class="mb-4 text-center">📬 Contact Form Submissions</h2>
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Message</th>
+          <th>Submitted At</th>
+        </tr>
+      </thead>
+      <tbody id="contactTableBody">
+        <!-- Filled by JS -->
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    async function fetchContacts() {
+      try {
+        const res = await fetch('/api/contacts');
+        const contacts = await res.json();
+        const tbody = document.getElementById('contactTableBody');
+        tbody.innerHTML = "";
+
+        contacts.forEach((c, i) => {
+          tbody.innerHTML += `
+            <tr>
+              <td>${i + 1}</td>
+              <td>${c.name}</td>
+              <td>${c.email}</td>
+              <td>${c.message}</td>
+              <td>${new Date(c.created_at).toLocaleString()}</td>
+            </tr>
+          `;
+        });
+      } catch (err) {
+        alert("Failed to load contacts.");
+        console.error(err);
+      }
+    }
+
+    fetchContacts();
+  </script>
+
+</body>
+</html>

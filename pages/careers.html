@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Careers - GlobalIT Hub</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/style.css" />
+  <style>
+    .section { padding: 80px 20px; }
+    .job-card {
+      border-left: 5px solid #0d6efd;
+      padding: 20px;
+      background-color: #f8f9fa;
+      transition: all 0.3s ease;
+    }
+    .job-card:hover {
+      background-color: #e9ecef;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+    <div class="container">
+      <a class="navbar-brand" href="index.html">GlobalIT Hub</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="about.html">About</a></li>
+          <li class="nav-item"><a class="nav-link" href="services.html">Services</a></li>
+          <li class="nav-item"><a class="nav-link active" href="careers.html">Careers</a></li>
+          <li class="nav-item"><a class="nav-link" href="blog.html">Blog</a></li>
+          <li class="nav-item"><a class="nav-link" href="contact.html">Contact</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="section text-center bg-primary text-white mt-5 pt-5">
+    <div class="container">
+      <h1 class="display-5 mb-3">Join the GlobalIT-Hub Team</h1>
+      <p class="lead">We're looking for passionate individuals to help drive the future of tech innovation.</p>
+    </div>
+  </section>
+
+  <!-- Job Openings (Dynamic) -->
+  <section class="section">
+    <div class="container">
+      <h2 class="text-center mb-5">Current Openings</h2>
+      <div class="row g-4" id="jobList">
+        <!-- Dynamic jobs will appear here -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Application Form -->
+  <section class="section bg-light">
+    <div class="container">
+      <h2 class="text-center mb-5">Submit Your Application</h2>
+      <div class="row justify-content-center">
+        <div class="col-md-8">
+          <form id="careerForm" enctype="multipart/form-data">
+            <div class="mb-3">
+              <label for="name" class="form-label">Full Name</label>
+              <input type="text" class="form-control" id="name" name="name" required />
+            </div>
+            <div class="mb-3">
+              <label for="email" class="form-label">Email Address</label>
+              <input type="email" class="form-control" id="email" name="email" required />
+            </div>
+            <div class="mb-3">
+              <label for="position" class="form-label">Position Applied For</label>
+              <input type="text" class="form-control" id="position" name="position" required />
+            </div>
+            <div class="mb-3">
+              <label for="resume" class="form-label">Upload Resume</label>
+              <input type="file" class="form-control" id="resume" name="resume" accept=".pdf,.doc,.docx" required />
+            </div>
+            <button type="submit" class="btn btn-primary">Submit Application</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-dark text-white text-center py-4 mt-5">
+    <p>&copy; 2025 GlobalIT Hub Consulting. All rights reserved.</p>
+  </footer>
+
+  <!-- Bootstrap -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Dynamic Job Load Script -->
+  <script>
+    async function loadJobs() {
+      try {
+        const res = await fetch('/api/jobs');
+        const jobs = await res.json();
+        const jobList = document.getElementById('jobList');
+        jobList.innerHTML = "";
+
+        jobs.forEach(job => {
+          const badgeColor =
+            job.type === 'Full-Time' ? 'primary' :
+            job.type === 'Remote' ? 'success' :
+            'warning text-dark';
+
+          jobList.innerHTML += `
+            <div class="col-md-6">
+              <div class="job-card">
+                <h5 class="mb-1">${job.title}</h5>
+                <span class="badge bg-${badgeColor}">${job.type}</span>
+                <p class="mt-2">${job.description}</p>
+              </div>
+            </div>
+          `;
+        });
+
+      } catch (err) {
+        console.error("❌ Error loading jobs:", err);
+        const jobList = document.getElementById('jobList');
+        jobList.innerHTML = `<p class="text-danger">Failed to load jobs. Try again later.</p>`;
+      }
+    }
+
+    loadJobs();
+  </script>
+
+  <!-- Resume Upload Form Handler -->
+  <script>
+    document.getElementById('careerForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const form = document.getElementById('careerForm');
+      const formData = new FormData(form);
+
+      try {
+        const res = await fetch('/api/careers/apply', {
+          method: 'POST',
+          body: formData
+        });
+
+        const result = await res.json();
+        alert(result.success || result.error);
+        if (result.success) form.reset();
+      } catch (err) {
+        console.error('Upload failed:', err);
+        alert('Something went wrong while submitting your application.');
+      }
+    });
+  </script>
+
+</body>
+</html>
